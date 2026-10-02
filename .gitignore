@@ -2,6 +2,7 @@
 .venv/
 venv/
 ENV/
+env/
 
 # Python caching 
 *.pyc
@@ -9,6 +10,7 @@ __pycache__/
 
 # Local Database (Only used for local testing)
 db.sqlite3
+*.log
 
 # Environment Variables (Contains secret AWS/Django keys)
 .env
@@ -18,3 +20,7 @@ db.sqlite3
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+# IDE/editor
+.vscode/
+.idea/
