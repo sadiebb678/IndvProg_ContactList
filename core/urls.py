@@ -16,7 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.http import HttpResponse
+
+# Simple Hello World view function
+def hello_world(request):
+    return HttpResponse("Hello, World!")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', hello_world, name='home'),  # Maps the "Hello World" to the root URL
 ]
