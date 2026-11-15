@@ -1,0 +1,101 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Contacts</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+
+    <header class="top-bar">
+        <div class="header-left">
+            <div class="logo-box">📒</div>
+            <div class="title-banner">Your Contacts:</div>
+        </div>
+        <button class="add-btn" title="Add Contact">+</button>
+    </header>
+
+    <div class="main-shell">
+        
+        <section class="left-panel">
+            <div class="panel-header">
+                <span>Homepage</span>
+                <div class="search-wrap">
+                    <input type="text" id="contactSearch" placeholder="Search...">
+                    <span class="search-icon">🔍</span>
+                </div>
+            </div>
+
+            <div class="sub-header">
+                <button class="filter-btn" id="resetFilter" title="Show All Contacts">▼</button>
+                <span class="status-text" id="statusText">Showing all contacts</span>
+            </div>
+
+            <div class="homepage-body">
+                <div class="az-bar" id="azBar">
+                    <span>A</span><span>B</span><span>C</span><span>D</span><span>E</span>
+                    <span>F</span><span>G</span><span>H</span><span>I</span><span>J</span>
+                    <span>K</span><span>L</span><span>M</span><span>N</span><span>O</span>
+                    <span>P</span><span>Q</span><span>R</span><span>S</span><span>T</span>
+                    <span>U</span><span>V</span><span>W</span><span>X</span><span>Y</span>
+                    <span>Z</span>
+                </div>
+
+                <div class="scroll-area" id="contactList">
+                    {% for contact in contacts %}
+                    <div class="contact-card" data-name="{{ contact.name|lower }}">
+                        <div class="card-top">
+                            <button class="star-btn" type="button">★</button>
+                            <div class="avatar-box">👤</div>
+                            <div class="card-info">
+                                <div class="card-name">{{ contact.name }}</div>
+                                <div class="card-sub">📞 {{ contact.phone|default:"No phone" }}</div>
+                                <div class="card-sub">✉️ {{ contact.email|default:"No email" }}</div>
+                            </div>
+                            <button class="drop-btn" type="button">▾</button>
+                        </div>
+                        <div class="card-dropdown">
+                            <div><strong>Role:</strong> {{ contact.role|default:"N/A" }}</div>
+                            <div><strong>Email:</strong> {{ contact.email|default:"N/A" }}</div>
+                            <div><strong>Phone:</strong> {{ contact.phone|default:"N/A" }}</div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="empty-msg">No contacts found.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+
+        <aside class="right-panel">
+            
+            <div class="panel-header center">Menu</div>
+            <div class="menu-body">
+                <button class="menu-btn" type="button">Add new characteristic</button>
+                <button class="menu-btn" type="button">Edit Characteristics</button>
+                <button class="menu-btn" type="button">Set default filtering/display</button>
+            </div>
+
+            <div class="panel-header center">Pinned Contacts</div>
+            <div class="pinned-wrapper">
+                <div class="pinned-grid">
+                    {% for contact in contacts|slice:":4" %}
+                    <div class="pin-tile" title="{{ contact.name }}">
+                        <div class="pin-avatar">👤</div>
+                    </div>
+                    {% endfor %}
+                    {% if contacts|length < 4 %}
+                    <div class="pin-tile empty-slot">+👤</div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </aside>
+
+    </div>
+
+    <script src="{% static 'js/dashboard.js' %}"></script>
+</body>
+</html>

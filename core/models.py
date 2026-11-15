@@ -5,6 +5,8 @@ class Contact(models.Model):
     role = models.CharField(max_length=100, blank=True)
     email = models.EmailField(blank=True)
     phone = models.CharField(max_length=20, blank=True)
+    notes = models.TextField(blank=True)
+    is_pinned = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
