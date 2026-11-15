@@ -1,44 +1,69 @@
-<!-- templates/home.html -->
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Contact List System</title>
-    <style>
-        body { font-family: sans-serif; margin: 40px; background: #f4f6f9; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #007bff; color: white; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workspace Portal</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 </head>
 <body>
 
-    <h1> ContactList </h1>
-    <p>Viewing mock application layout baseline data.</p>
+    <header>
+        <h1>Workspace Portal</h1>
+        <span>{{ request.user.username|default:"Admin User" }}</span>
+    </header>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Full Name</th>
-                <th>Email Address</th>
-                <th>Phone Number</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Loop through list -->
-            {% for contact in contacts %}
-            <tr>
-                <td><strong>{{ contact.name }}</strong></td>
-                <td>{{ contact.email }}</td>
-                <td>{{ contact.phone }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3">No contact listings found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="app-container">
+        <aside class="window-panel">
+            <div class="window-header">Contacts</div>
+            <div class="search-bar">
+                <input type="text" id="contactSearch" placeholder="Search contacts..." onkeyup="filterContacts()">
+            </div>
+            <div class="window-body" id="contactList">
+                
+                {% for contact in contacts %}
+                <div class="contact-item">
+                    <div class="contact-summary" onclick="toggleContact(this)">
+                        <span class="contact-name">{{ contact.name }}</span>
+                        <span class="contact-arrow">▼</span>
+                    </div>
+                    <div class="contact-details">
+                        <div class="detail-row"><strong>Role:</strong> <span>{{ contact.role }}</span></div>
+                        <div class="detail-row"><strong>Email:</strong> <span>{{ contact.email }}</span></div>
+                        <div class="detail-row"><strong>Phone:</strong> <span>{{ contact.phone }}</span></div>
+                    </div>
+                </div>
+                {% empty %}
+                <p>No contacts found.</p>
+                {% endfor %}
+
+            </div>
+        </aside>
+
+        <main class="window-panel">
+            <div class="window-header">Activity & Details</div>
+            <div class="window-body">
+                <p>Main content goes here.</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function toggleContact(element) {
+            element.parentElement.classList.toggle('open');
+        }
+
+        function filterContacts() {
+            const query = document.getElementById('contactSearch').value.toLowerCase();
+            const items = document.querySelectorAll('.contact-item');
+
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                item.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
+    </script>
 
 </body>
 </html>

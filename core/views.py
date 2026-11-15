@@ -1,6 +1,6 @@
-# core/views.py
-import requests
-from django.http import HttpResponse
+from django.shortcuts import render
+from .models import Contact
 
-def home_view(request):
-    return HttpResponse("Contact List App is Running!")
+def dashboard(request):
+    contacts = Contact.objects.all().order_by('name')
+    return render(request, 'dashboard.html', {'contacts': contacts})

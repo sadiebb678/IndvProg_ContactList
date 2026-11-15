@@ -18,12 +18,13 @@ from django.contrib import admin
 from django.urls import path
 from django.http import HttpResponse
 from django.shortcuts import render
-from .views import home_view
+from core.views import dashboard
 
 # core/urls.py
 from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', home_view, name='home'),
+    path("admin/", admin.site.urls),
+    path('', dashboard, name='dashboard'),
 ]
