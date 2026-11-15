@@ -27,8 +27,12 @@ SECRET_KEY = 'django-insecure-vioo$@ec5f)pid-#z_z(p66v0$jzo4c#oz=89wk#mop*mmnqe9
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '*'
+    '.elasticbeanstalk.com',
+    '172.31.46.1',   # instance private IP
+    '127.0.0.1',
+    'localhost',
 ]
+
 
 #Auto gen token using active AWS terminal credentials per default AWS security config
 def get_aws_iam_token(): 
@@ -47,6 +51,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'core'
 ]
 
 MIDDLEWARE = [

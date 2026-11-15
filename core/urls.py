@@ -18,28 +18,12 @@ from django.contrib import admin
 from django.urls import path
 from django.http import HttpResponse
 from django.shortcuts import render
-from core.views import home_view
+from .views import home_view
 
-def home_view(request):
-    #mock data for now
-    contacts = [
-        {"name": "Steve Smith", "email": "alice@example.com", "phone": "555-0192"},
-        {"name": "Bob Mark", "email": "bob@example.com", "phone": "555-0143"},
-        {"name": "Charlie Douglas", "email": "charlie@example.com", "phone": "555-0188"},
-    ]
-
-    context = {
-        "contacts": dummy_contacts
-    }
-    
-    return render(request, "home.html", context)
-
-# Simple Hello World view function
-def hello_world(request):
-    return HttpResponse("Hello, World!")
-
+# core/urls.py
+from django.urls import path
+from . import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', home_view, name='home'),  
+    path('', home_view, name='home'),
 ]
