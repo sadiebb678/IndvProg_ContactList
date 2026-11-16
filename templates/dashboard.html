@@ -14,7 +14,7 @@
             <div class="logo-box">📒</div>
             <div class="title-banner">Your Contacts:</div>
         </div>
-        <button class="add-btn" title="Add Contact">+</button>
+        <button class="add-btn" id="openAddModal" type="button" title="Add Contact">+</button>
     </header>
 
     <div class="main-shell">
@@ -47,7 +47,7 @@
                     {% for contact in contacts %}
                     <div class="contact-card" data-name="{{ contact.name|lower }}">
                         <div class="card-top">
-                            <button class="star-btn" type="button">★</button>
+                            <button class="star-btn {% if contact.is_pinned %}active{% endif %}" data-id="{{ contact.id }}" type="button">★</button>
                             <div class="avatar-box">👤</div>
                             <div class="card-info">
                                 <div class="card-name">{{ contact.name }}</div>
@@ -57,9 +57,13 @@
                             <button class="drop-btn" type="button">▾</button>
                         </div>
                         <div class="card-dropdown">
-                            <div><strong>Role:</strong> {{ contact.role|default:"N/A" }}</div>
-                            <div><strong>Email:</strong> {{ contact.email|default:"N/A" }}</div>
-                            <div><strong>Phone:</strong> {{ contact.phone|default:"N/A" }}</div>
+                            <div class="detail-row"><strong>Email:</strong> {{ contact.email|default:"N/A" }}</div>
+                            <div class="detail-row"><strong>Phone:</strong> {{ contact.phone|default:"N/A" }}</div>
+                            {% if contact.custom_fields %}
+                                {% for label, value in contact.custom_fields.items %}
+                                <div class="detail-row"><strong>{{ label }}:</strong> {{ value }}</div>
+                                {% endfor %}
+                            {% endif %}
                         </div>
                     </div>
                     {% empty %}
@@ -73,7 +77,7 @@
             
             <div class="panel-header center">Menu</div>
             <div class="menu-body">
-                <button class="menu-btn" type="button">Add new characteristic</button>
+                <button class="menu-btn" id="menuAddCharBtn" type="button">Add new characteristic</button>
                 <button class="menu-btn" type="button">Edit Characteristics</button>
                 <button class="menu-btn" type="button">Set default filtering/display</button>
             </div>
@@ -81,19 +85,65 @@
             <div class="panel-header center">Pinned Contacts</div>
             <div class="pinned-wrapper">
                 <div class="pinned-grid">
-                    {% for contact in contacts|slice:":4" %}
+                    {% for contact in pinned_contacts %}
                     <div class="pin-tile" title="{{ contact.name }}">
                         <div class="pin-avatar">👤</div>
                     </div>
                     {% endfor %}
-                    {% if contacts|length < 4 %}
-                    <div class="pin-tile empty-slot">+👤</div>
+                    {% if pinned_contacts|length < 4 %}
+                    <div class="pin-tile empty-slot" id="pinnedEmptySlot">+👤</div>
                     {% endif %}
                 </div>
             </div>
 
         </aside>
 
+    </div>
+
+    <div id="contactModalOverlay" class="modal-backdrop">
+        <div class="modal-card">
+            <div class="modal-top">
+                <span>📒 New Contact</span>
+                <button type="button" id="closeModalBtn" class="modal-close">✕</button>
+            </div>
+
+            <form method="POST" action="{% url 'dashboard' %}">
+                {% csrf_token %}
+
+                <div class="input-block">
+                    <label>Name *</label>
+                    <input type="text" name="name" placeholder="Enter contact name..." required>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-block">
+                        <label>📞 Phone</label>
+                        <input type="text" name="phone" placeholder="555-0199">
+                    </div>
+                    <div class="input-block">
+                        <label>✉️ Email</label>
+                        <input type="email" name="email" placeholder="name@example.com">
+                    </div>
+                </div>
+
+                <div class="characteristics-box">
+                    <div class="char-header">
+                        <span>Characteristics</span>
+                        <button type="button" id="addCharRowBtn" class="add-char-btn">+ Add Characteristic</button>
+                    </div>
+                    <div id="charRowsContainer"></div>
+                </div>
+
+                <label class="pin-toggle">
+                    <input type="checkbox" name="is_pinned"> ★ Pin to Pinned Contacts
+                </label>
+
+                <div class="modal-footer">
+                    <button type="button" id="cancelModalBtn" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Contact</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script src="{% static 'js/dashboard.js' %}"></script>

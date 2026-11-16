@@ -27,4 +27,5 @@ from . import views
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('', dashboard, name='dashboard'),
+     path('toggle-pin/<int:pk>/', views.toggle_pin, name='toggle_pin'),
 ]
