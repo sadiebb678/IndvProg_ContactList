@@ -33,6 +33,7 @@ ALLOWED_HOSTS = [
     '.elasticbeanstalk.com',
     '172.31.46.1',   # instance private IP
     '127.0.0.1',
+    '172.31.0.183',
     'localhost',
 ]
 
