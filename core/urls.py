@@ -26,5 +26,5 @@ from . import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('dash/', dashboard, name='dashboard'),
+    path('', dashboard, name='dashboard'),
 ]
