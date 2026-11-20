@@ -29,7 +29,7 @@
             </div>
 
             <div class="sub-header">
-                <button class="filter-btn" id="resetFilter" title="Show All Contacts">▼</button>
+                <button class="filter-btn" id="resetFilter" title="Reset Filter">▼</button>
                 <span class="status-text" id="statusText">Showing all contacts</span>
             </div>
 
@@ -45,10 +45,16 @@
 
                 <div class="scroll-area" id="contactList">
                     {% for contact in contacts %}
-                    <div class="contact-card" data-name="{{ contact.name|lower }}">
+                    <div class="contact-card" data-name="{{ contact.name|lower }}" data-pinned="{{ contact.is_pinned|yesno:'true,false' }}">
                         <div class="card-top">
                             <button class="star-btn {% if contact.is_pinned %}active{% endif %}" data-id="{{ contact.id }}" type="button">★</button>
-                            <div class="avatar-box">👤</div>
+                            <div class="avatar-box">
+                                {% if contact.avatar %}
+                                    <img src="{{ contact.avatar }}" alt="{{ contact.name }}" class="avatar-img">
+                                {% else %}
+                                    👤
+                                {% endif %}
+                            </div>
                             <div class="card-info">
                                 <div class="card-name">{{ contact.name }}</div>
                                 <div class="card-sub">📞 {{ contact.phone|default:"No phone" }}</div>
@@ -64,6 +70,21 @@
                                 <div class="detail-row"><strong>{{ label }}:</strong> {{ value }}</div>
                                 {% endfor %}
                             {% endif %}
+                            {{ contact.custom_fields|json_script:contact.id }}
+                            <div class="dropdown-actions">
+                                <button type="button" class="btn-secondary edit-contact-btn"
+                                    data-id="{{ contact.id }}"
+                                    data-name="{{ contact.name }}"
+                                    data-phone="{{ contact.phone }}"
+                                    data-email="{{ contact.email }}"
+                                    data-pinned="{{ contact.is_pinned|yesno:'true,false' }}">
+                                    Edit Contact
+                                </button>
+                                <form method="POST" action="{% url 'delete_contact' contact.id %}" onsubmit="return confirm('Delete {{ contact.name }}?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-danger">Delete</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                     {% empty %}
@@ -78,8 +99,8 @@
             <div class="panel-header center">Menu</div>
             <div class="menu-body">
                 <button class="menu-btn" id="menuAddCharBtn" type="button">Add new characteristic</button>
-                <button class="menu-btn" type="button">Edit Characteristics</button>
-                <button class="menu-btn" type="button">Set default filtering/display</button>
+                <button class="menu-btn" id="menuEditCharBtn" type="button">Edit Characteristics</button>
+                <button class="menu-btn" id="menuFilterBtn" type="button">Set default filtering/display</button>
             </div>
 
             <div class="panel-header center">Pinned Contacts</div>
@@ -87,12 +108,14 @@
                 <div class="pinned-grid">
                     {% for contact in pinned_contacts %}
                     <div class="pin-tile" title="{{ contact.name }}">
-                        <div class="pin-avatar">👤</div>
+                        {% if contact.avatar %}
+                            <img src="{{ contact.avatar }}" alt="{{ contact.name }}" class="avatar-img">
+                        {% else %}
+                            <div class="pin-avatar">👤</div>
+                        {% endif %}
                     </div>
                     {% endfor %}
-                    {% if pinned_contacts|length < 4 %}
-                    <div class="pin-tile empty-slot" id="pinnedEmptySlot">+👤</div>
-                    {% endif %}
+
                 </div>
             </div>
 
@@ -103,13 +126,17 @@
     <div id="contactModalOverlay" class="modal-backdrop">
         <div class="modal-card">
             <div class="modal-top">
-                <span>📒 New Contact</span>
+                <span id="modalTitle">📒 New Contact</span>
                 <button type="button" id="closeModalBtn" class="modal-close">✕</button>
             </div>
-
-            <form method="POST" action="{% url 'dashboard' %}">
+            <form id="contactForm" method="POST" action="{% url 'dashboard' %}">
                 {% csrf_token %}
 
+                <div class="input-block">
+                    <label>📷 Contact Icon / Photo</label>
+                    <input type="file" id="avatarFilePicker" accept="image/*">
+                    <input type="hidden" name="avatar_data" id="avatarDataInput">
+                </div>
                 <div class="input-block">
                     <label>Name *</label>
                     <input type="text" name="name" placeholder="Enter contact name..." required>
@@ -135,7 +162,7 @@
                 </div>
 
                 <label class="pin-toggle">
-                    <input type="checkbox" name="is_pinned"> ★ Pin to Pinned Contacts
+                    <input type="checkbox" id="modalPinCheckbox" name="is_pinned"> ★ Pin to Pinned Contacts
                 </label>
 
                 <div class="modal-footer">
@@ -146,6 +173,86 @@
         </div>
     </div>
 
-    <script src="{% static 'js/dashboard.js' %}"></script>
+    <div id="newCharModal" class="modal-backdrop">
+        <div class="modal-card">
+            <div class="modal-top">
+                <span>➕ Add New Characteristic</span>
+                <button type="button" id="closeNewCharBtn" class="modal-close">✕</button>
+            </div>
+            <form method="POST" action="{% url 'add_characteristic' %}">
+                {% csrf_token %}
+                <div class="input-block">
+                    <label>Characteristic Name *</label>
+                    <input type="text" name="char_name" placeholder="e.g. Birthday, Company, Role" required>
+                </div>
+                <div class="input-block">
+                    <label>Default Value</label>
+                    <input type="text" name="default_val" placeholder="e.g. N/A">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="cancelNewCharBtn" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary">Add to All Contacts</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="manageCharModal" class="modal-backdrop">
+        <div class="modal-card">
+            <div class="modal-top">
+                <span>✏️ Edit Characteristics</span>
+                <button type="button" id="closeManageCharBtn" class="modal-close">✕</button>
+            </div>
+            <div class="manage-char-body">
+                {% for key in characteristic_keys %}
+                <form method="POST" action="{% url 'manage_characteristics' %}" class="manage-char-row">
+                    {% csrf_token %}
+                    <input type="hidden" name="old_key" value="{{ key }}">
+                    <input type="text" name="new_key" value="{{ key }}" required>
+                    <button type="submit" name="action" value="rename" class="btn-primary">Rename</button>
+                    <button type="submit" name="action" value="delete" class="char-remove">✕</button>
+                </form>
+                {% empty %}
+                <p class="empty-msg">No custom characteristics created yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div id="filterDisplayModal" class="modal-backdrop">
+        <div class="modal-card">
+            <div class="modal-top">
+                <span>⚙️ Default Filtering & Display</span>
+                <button type="button" id="closeFilterModalBtn" class="modal-close">✕</button>
+            </div>
+            <div class="filter-modal-body">
+                <div class="input-block">
+                    <label>Default Sort Order</label>
+                    <select id="defaultSortSelect" class="modal-select">
+                        <option value="az">Alphabetical (A → Z)</option>
+                        <option value="za">Reverse Alphabetical (Z → A)</option>
+                        <option value="pinned_first">Pinned Contacts First</option>
+                    </select>
+                </div>
+                <div class="input-block">
+                    <label>Default View</label>
+                    <select id="defaultViewSelect" class="modal-select">
+                        <option value="all">Show All Contacts</option>
+                        <option value="pinned_only">Pinned Contacts Only</option>
+                    </select>
+                </div>
+                <label class="pin-toggle">
+                    <input type="checkbox" id="compactModeCheckbox"> Compact Card View (Hide phone/email preview)
+                </label>
+                <div class="modal-footer">
+                    <button type="button" id="cancelFilterModalBtn" class="btn-secondary">Cancel</button>
+                    <button type="button" id="saveDisplayPrefsBtn" class="btn-primary">Save Preferences</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/dashboard.js' %}?v=3"></script>
 </body>
 </html>
+

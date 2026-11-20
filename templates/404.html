@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/404.css' %}">
+</head>
+<body>
+
+    <header class="top-bar">
+        <div class="header-left">
+            <div class="logo-box">📒</div>
+            <div class="title-banner">Your Contacts:</div>
+        </div>
+        <a href="{% url 'dashboard' %}" class="add-btn home-icon-btn" title="Back to Contacts">⌂</a>
+    </header>
+
+    <div class="error-shell">
+        <div class="panel-header">
+            <span>Page Not Found</span>
+        </div>
+
+        <div class="error-body">
+            <div class="error-card">
+                <div class="error-card-top">🔍</div>
+                <div class="error-card-content">
+                    <div class="error-code">404</div>
+                    <div class="error-title">Contact or Page Not Found</div>
+                    <p class="error-desc">The page you are looking for does not exist or may have been moved.</p>
+                    <a href="{% url 'dashboard' %}" class="home-btn">Return to Homepage</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

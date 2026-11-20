@@ -8,6 +8,6 @@ class Contact(models.Model):
     notes = models.TextField(blank=True)
     is_pinned = models.BooleanField(default=False)
     custom_fields = models.JSONField(default=dict, blank=True)
-    
+    avatar = models.TextField(blank=True, default='')    
     def __str__(self):
         return self.name
